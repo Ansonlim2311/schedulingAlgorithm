@@ -5,6 +5,15 @@ using namespace std;
 
 void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses) {
     float averageWaitingTime = 0, averageTurnaroundTime = 0;
+    int time = 0;
+    int quantum = 3;
+
+    queue<int> readyQueue;
+    bool isFinished[numProcesses] = {false};  // Process completion tracker
+    bool inReadyQueue[numProcesses] = {false};  // Tracks if a process is in the queue
+    int completionTime[numProcesses] = {0};  // Stores when each process completes
+
+    cout << "Round Robin with Quantum 3" << endl;
 
     // for checking purpose
     // cout << "Arrival times for each process:\n";
@@ -28,6 +37,8 @@ void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turna
     //     cout << priority[i];
     //     cout << endl;
     // }
+
+    
 }
 
 void SRT() {
@@ -59,25 +70,39 @@ int main() {
 
     cout << "Enter arrival times for each process:\n";
     for (int i = 0; i < numProcesses; i++) {
-        cout << "Process P" << i + 1 << ": ";
-        cin >> arrivalTime[i];
+        if (i == 0) {
+            cout << "Process P" << i << ": ";
+        } 
+        else {
+            cout << "Process P" << i + 1 << ": ";
+            cin >> arrivalTime[i];
+        }
     }
 
     cout << "Enter burst times for each process:\n";
     for (int i = 0; i < numProcesses; i++) {
-        cout << "Process P" << i + 1 << ": ";
-        cin >> burstTime[i];
+        if (i == 0) {
+            cout << "Process P" << i << ": ";
+        } 
+        else {
+            cout << "Process P" << i + 1 << ": ";
+            cin >> burstTime[i];
+        }
         remainingBurstTime[i] = burstTime[i];
     }
 
     cout << "Enter priority for each process:\n";
     for (int i = 0; i < numProcesses; i++) {
-        cout << "Process P" << i + 1 << ": ";
-        cin >> priority[i];
+        if (i == 0) {
+            cout << "Process P" << i << ": ";
+        } else {
+                cout << "Process P" << i + 1 << ": ";
+            cin >> priority[i]; 
+        }
     }
 
     roundRobin(arrivalTime, burstTime, waitingTime, turnaroundTime, priority, remainingBurstTime, numProcesses);
-    
+
     int choice;
 
     cout << "Choose scheduling algorithm:\n";
