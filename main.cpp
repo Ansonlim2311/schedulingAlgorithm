@@ -1,9 +1,25 @@
 #include <iostream>
 #include <queue>
+#include <iomanip>
 
 using namespace std;
 
-void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses) {
+void createTable(int arrivalTime[], int burstTime[], int finishTime[], int turnaroundTime[], int waitingTime[], int priority[], int numProcesses) {
+    
+    cout << endl << "Process Details:" << endl;
+    cout << "     Arrival Time   " << "Burst Time   " << "Finish Time   " << "Turnaround Time   " << "Waiting Time" << endl;
+    for (int i = 0; i < numProcesses; i++) {
+        cout << "P" << i + 1
+             << setw(4) << arrivalTime[i]
+             << setw(15) << burstTime[i]
+             << setw(14) << finishTime[i]
+             << setw(14) << turnaroundTime[i] 
+             << setw(18) << waitingTime[i] 
+             << endl;
+    }
+}
+
+void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
     float averageWaitingTime = 0, averageTurnaroundTime = 0;
     int time = 0;
     int quantum = 3;
@@ -27,8 +43,6 @@ void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turna
         // Process the queue until it's empty
         if (!readyQueue.empty()) {
             int currentProcess = readyQueue.front();
-            // readyQueue.pop();
-            // inReadyQueue[currentProcess] = false;
 
             // Check if the process can execute within the quantum
             if (remainingBurstTime[currentProcess] > quantum) {
@@ -62,6 +76,7 @@ void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turna
             } else {
                 cout << "Process P" << currentProcess + 1 
                      << " completed at time " << time << endl;
+                finishTime[currentProcess] = time;
                 isFinished[currentProcess] = true;
             }
         }
@@ -76,49 +91,31 @@ void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turna
         if (finishedAll) break;
     }
 
-    // Display results
-    cout << "\nProcess Details:\n";
+    // Calculate Waiting Time and Turnaround Time
     for (int i = 0; i < numProcesses; i++) {
-        cout << "Process P" << i + 1 << ": Waiting Time = " 
-             << waitingTime[i] << ", Turnaround Time = " 
-             << turnaroundTime[i] << endl;
+        averageWaitingTime += waitingTime[i];
+        averageTurnaroundTime += turnaroundTime[i];
     }
 
-    // for checking purpose
-    // cout << "Arrival times for each process:\n";
-    // for (int i = 0; i < numProcesses; i++) {
-    //     cout << "Process P" << i + 1 << ": ";
-    //     cout << arrivalTime[i];
-    //     cout << endl;
-    // }
+    averageWaitingTime /= numProcesses;
+    averageTurnaroundTime /= numProcesses;
 
-    // cout << "Burst times for each process:\n";
-    // for (int i = 0; i < numProcesses; i++) {
-    //     cout << "Process P" << i + 1 << ": ";
-    //     cout << burstTime[i];
-    //     remainingBurstTime[i] = burstTime[i];
-    //     cout << endl;
-    // }
+    createTable(arrivalTime, burstTime, finishTime, turnaroundTime, waitingTime, priority, numProcesses);
 
-    // cout << "Priority for each process:\n";
-    // for (int i = 0; i < numProcesses; i++) {
-    //     cout << "Process P" << i + 1 << ": ";
-    //     cout << priority[i];
-    //     cout << endl;
-    // }
-
-    
+    cout << endl;
+    cout << "Average Turnaround Time: " << averageTurnaroundTime << endl;
+    cout << "Average Waiting Time   : " << averageWaitingTime << endl << endl;
 }
 
-void SJN(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int remainingBurstTime[], int numProcesses) {
+void SJN(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
 
 }
 
-void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses) {
+void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
 
 }
 
-void non_preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses) {
+void non_preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
 
 }
 
@@ -134,7 +131,7 @@ int main() {
         return 0;
     }
 
-    int arrivalTime[numProcesses], burstTime[numProcesses], waitingTime[numProcesses], turnaroundTime[numProcesses], priority[numProcesses];
+    int arrivalTime[numProcesses], burstTime[numProcesses], waitingTime[numProcesses], turnaroundTime[numProcesses], priority[numProcesses], finishTime[numProcesses];
     int remainingBurstTime[numProcesses];
 
     cout << "Enter arrival times for each process:\n";
@@ -173,7 +170,7 @@ int main() {
         }
     }
 
-    roundRobin(arrivalTime, burstTime, waitingTime, turnaroundTime, priority, remainingBurstTime, numProcesses);
+    roundRobin(arrivalTime, burstTime, waitingTime, turnaroundTime, priority, remainingBurstTime, numProcesses, finishTime);
 
     int choice;
 
@@ -186,13 +183,13 @@ int main() {
 
     switch (choice) {
         case 1:
-            SJN(arrivalTime, burstTime, waitingTime, turnaroundTime, remainingBurstTime, numProcesses);
+            SJN(arrivalTime, burstTime, waitingTime, turnaroundTime, remainingBurstTime, numProcesses, finishTime);
             break;
         case 2:
-            preemptivePriority(arrivalTime, burstTime, waitingTime, turnaroundTime, priority, remainingBurstTime, numProcesses);
+            preemptivePriority(arrivalTime, burstTime, waitingTime, turnaroundTime, priority, remainingBurstTime, numProcesses, finishTime);
             break;
         case 3:
-            non_preemptivePriority(arrivalTime, burstTime, waitingTime, turnaroundTime, priority, remainingBurstTime, numProcesses);
+            non_preemptivePriority(arrivalTime, burstTime, waitingTime, turnaroundTime, priority, remainingBurstTime, numProcesses, finishTime);
             break;
         default:
             cout << "Invalid choice!";
