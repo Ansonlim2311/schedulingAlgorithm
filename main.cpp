@@ -30,7 +30,7 @@ void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turna
     bool inReadyQueue[numProcesses] = {false};  // Tracks if a process is in the queue
     int completionTime[numProcesses] = {0};  // Stores when each process completes
 
-    cout << "Round Robin with Quantum 3" << endl;
+    cout << "Round Robin with Quantum 3" << endl << endl;
 
     while (true) {
         bool allFinished = true;  // Flag to check if all processes are finished
@@ -49,12 +49,14 @@ void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turna
             if (remainingBurstTime[currentProcess] > quantum) {
                 time += quantum;
                 remainingBurstTime[currentProcess] -= quantum;
-                cout << "Process P" << currentProcess << " executed for " << quantum << " units of time. Time now: " << time << endl;
+                // cout << "Process P" << currentProcess << " executed for " << quantum << " units of time. Time now: " << time << endl;
+                cout << "| P" << currentProcess << " ";
             } else {
                 time += remainingBurstTime[currentProcess];
                 turnaroundTime[currentProcess] = time - arrivalTime[currentProcess];
                 waitingTime[currentProcess] = turnaroundTime[currentProcess] - burstTime[currentProcess];
-                cout << "Process P" << currentProcess << " executed for " << remainingBurstTime[currentProcess] << " units of time. Time now: " << time << endl;
+                // cout << "Process P" << currentProcess << " executed for " << remainingBurstTime[currentProcess] << " units of time. Time now: " << time << endl;
+                cout << "|P" << currentProcess << "";
                 remainingBurstTime[currentProcess] = 0;
                 processFinished[currentProcess] = true;  // Mark this process as finished
             }
@@ -73,7 +75,7 @@ void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turna
                 readyQueue.push(currentProcess);
                 inReadyQueue[currentProcess] = true;
             } else {
-                cout << "Process P" << currentProcess << " completed at time " << time << endl;
+                // cout << "Process P" << currentProcess << " completed at time " << time << endl;
                 finishTime[currentProcess] = time;
                 processFinished[currentProcess] = true;
             }
@@ -89,7 +91,10 @@ void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turna
                 break;
             }
         }
-        if (finishedAll) break;
+        if (finishedAll) {
+            cout << "|" << endl;
+            break;
+        }
     }
 
     // Calculate Waiting Time and Turnaround Time
