@@ -15,7 +15,7 @@ void roundRobin() {
     }
 
     int arrivalTime[numProcesses], burstTime[numProcesses], waitingTime[numProcesses], turnaroundTime[numProcesses], priority[numProcesses];
-    int remainingBurstTime[numProcesses];  // For tracking the remaining burst time of processes
+    int remainingBurstTime[numProcesses];
     float averageWaitingTime = 0, averageTurnaroundTime = 0;
 
     cout << "Enter arrival times for each process:\n";
@@ -38,21 +38,21 @@ void roundRobin() {
     }
 
     // Round Robin Scheduling with Quantum of 3
-    int quantum = 3;  // Time quantum
-    int time = 0;     // Start time
-    queue<int> readyQueue;  // Queue to manage ready processes
-    bool isFinished[numProcesses] = {false};  // Array to track if a process is completed
-    bool inReadyQueue[numProcesses] = {false};  // Track if a process is in the ready queue
+    int quantum = 3;
+    int time = 0;
+    queue<int> readyQueue;
+    bool isFinished[numProcesses] = {false};
+    bool inReadyQueue[numProcesses] = {false};
 
     // Loop until all processes are completed
     while (true) {
-        bool allFinished = true;  // Flag to check if all processes are finished
+        bool allFinished = true;
 
-        // Add processes to the ready queue if their arrival time has passed
+        // Add processes to ready queue if their arrival time <= current time
         for (int i = 0; i < numProcesses; i++) {
             if (!isFinished[i] && arrivalTime[i] <= time && !inReadyQueue[i]) {
                 readyQueue.push(i);
-                inReadyQueue[i] = true;  // Mark process as added to the ready queue
+                inReadyQueue[i] = true;
             }
         }
 
@@ -60,23 +60,40 @@ void roundRobin() {
         if (!readyQueue.empty()) {
             int currentProcess = readyQueue.front();
             readyQueue.pop();
-            inReadyQueue[currentProcess] = false;  // Remove from ready queue
+            inReadyQueue[currentProcess] = false;
 
             // Check if the process can execute within the quantum
-            if (remainingBurstTime[currentProcess] > quantum) {
-                remainingBurstTime[currentProcess] -= quantum;
-                time += quantum;
-                cout << "Process P" << currentProcess + 1 << " executed for " << quantum << " units of time. Remaining burst time: " << remainingBurstTime[currentProcess] << endl;
-                readyQueue.push(currentProcess);  // Re-add to the queue if not finished
-            } else {
-                time += remainingBurstTime[currentProcess];
-                cout << "Process P" << currentProcess + 1 << " executed for " << remainingBurstTime[currentProcess] << " units of time. Completed at time " << time << endl;
-                remainingBurstTime[currentProcess] = 0;
-                isFinished[currentProcess] = true;  // Mark this process as finished
+            int execTime = min(quantum, remainingBurstTime[currentProcess]);
+            remainingBurstTime[currentProcess] -= execTime;
+            time += execTime;
+
+            cout << "Process P" << currentProcess + 1 
+                 << " executed for " << execTime 
+                 << " units of time. Time now: " << time << endl;
+
+            // After executing, check for new arrivals
+            for (int i = 0; i < numProcesses; i++) {
+                if (!isFinished[i] && arrivalTime[i] <= time && !inReadyQueue[i]) {
+                    readyQueue.push(i);
+                    inReadyQueue[i] = true;
+                }
             }
+
+            // If the process is not finished, re-add it to the queue
+            if (remainingBurstTime[currentProcess] > 0) {
+                readyQueue.push(currentProcess);
+                inReadyQueue[currentProcess] = true;
+            } else {
+                cout << "Process P" << currentProcess + 1 
+                     << " completed at time " << time << endl;
+                isFinished[currentProcess] = true;
+            }
+        } else {
+            // If no process is ready, increment time
+            time++;
         }
 
-        // If all processes are finished, break the loop
+        // Check if all processes are finished
         bool finishedAll = true;
         for (int i = 0; i < numProcesses; i++) {
             if (!isFinished[i]) {
@@ -84,27 +101,27 @@ void roundRobin() {
                 break;
             }
         }
-
         if (finishedAll) break;
     }
 
     // Calculate Waiting Time and Turnaround Time
     for (int i = 0; i < numProcesses; i++) {
-        turnaroundTime[i] = time - arrivalTime[i];  // Turnaround Time = Completion Time - Arrival Time
-        waitingTime[i] = turnaroundTime[i] - burstTime[i];  // Waiting Time = Turnaround Time - Burst Time
+        turnaroundTime[i] = time - arrivalTime[i];  
+        waitingTime[i] = turnaroundTime[i] - burstTime[i];
 
         averageWaitingTime += waitingTime[i];
         averageTurnaroundTime += turnaroundTime[i];
     }
 
-    // Calculate average Waiting Time and Turnaround Time
     averageWaitingTime /= numProcesses;
     averageTurnaroundTime /= numProcesses;
 
-    // Output results
+    // Display results
     cout << "\nProcess Details:\n";
     for (int i = 0; i < numProcesses; i++) {
-        cout << "Process P" << i + 1 << ": Waiting Time = " << waitingTime[i] << ", Turnaround Time = " << turnaroundTime[i] << endl;
+        cout << "Process P" << i + 1 << ": Waiting Time = " 
+             << waitingTime[i] << ", Turnaround Time = " 
+             << turnaroundTime[i] << endl;
     }
 
     cout << "\nAverage Waiting Time: " << averageWaitingTime << endl;
@@ -112,6 +129,6 @@ void roundRobin() {
 }
 
 int main() {
-    roundRobin();  // Call the Round Robin function
+    roundRobin();
     return 0;
 }
