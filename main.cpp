@@ -30,7 +30,7 @@ void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turna
     bool inReadyQueue[numProcesses] = {false};  // Tracks if a process is in the queue
     int completionTime[numProcesses] = {0};  // Stores when each process completes
 
-    cout << "Round Robin with Quantum 3" << endl << endl;
+    cout << endl << "Round Robin with Quantum 3" << endl << endl;
 
     while (true) {
         bool allFinished = true;  // Flag to check if all processes are finished
