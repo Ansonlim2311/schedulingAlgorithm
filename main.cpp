@@ -7,12 +7,13 @@ using namespace std;
 void createTable(int arrivalTime[], int burstTime[], int finishTime[], int turnaroundTime[], int waitingTime[], int priority[], int numProcesses) {
     
     cout << endl << "Process Details:" << endl;
-    cout << "     Arrival Time   " << "Burst Time   " << "Finish Time   " << "Turnaround Time   " << "Waiting Time" << endl;
+    cout << "     Arrival Time   " << "Burst Time   " << "Priority   " << "Finish Time   " << "Turnaround Time   " << "Waiting Time" << endl;
     for (int i = 0; i < numProcesses; i++) {
         cout << "P" << i + 1
              << setw(4) << arrivalTime[i]
              << setw(15) << burstTime[i]
-             << setw(14) << finishTime[i]
+             << setw(13) << priority[i]
+             << setw(12) << finishTime[i]
              << setw(14) << turnaroundTime[i] 
              << setw(18) << waitingTime[i] 
              << endl;
@@ -25,7 +26,7 @@ void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turna
     int quantum = 3;
 
     queue<int> readyQueue;
-    bool isFinished[numProcesses] = {false};  // Process completion tracker
+    bool processFinished[numProcesses] = {false};  // Process completion tracker
     bool inReadyQueue[numProcesses] = {false};  // Tracks if a process is in the queue
     int completionTime[numProcesses] = {0};  // Stores when each process completes
 
@@ -35,7 +36,7 @@ void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turna
         bool allFinished = true;  // Flag to check if all processes are finished
         // Add processes to the ready queue if their arrival time has passed
         for (int i = 0; i < numProcesses; i++) {
-            if (!isFinished[i] && arrivalTime[i] <= time &&!inReadyQueue[i]) {
+            if (!processFinished[i] && arrivalTime[i] <= time &&!inReadyQueue[i]) {
                 readyQueue.push(i);
                 inReadyQueue[i] = true;  // Mark process as added to the ready queue
             }
@@ -48,21 +49,19 @@ void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turna
             if (remainingBurstTime[currentProcess] > quantum) {
                 time += quantum;
                 remainingBurstTime[currentProcess] -= quantum;
+                cout << "Process P" << currentProcess << " executed for " << quantum << " units of time. Time now: " << time << endl;
             } else {
                 time += remainingBurstTime[currentProcess];
                 turnaroundTime[currentProcess] = time - arrivalTime[currentProcess];
                 waitingTime[currentProcess] = turnaroundTime[currentProcess] - burstTime[currentProcess];
+                cout << "Process P" << currentProcess << " executed for " << remainingBurstTime[currentProcess] << " units of time. Time now: " << time << endl;
                 remainingBurstTime[currentProcess] = 0;
-                isFinished[currentProcess] = true;  // Mark this process as finished
+                processFinished[currentProcess] = true;  // Mark this process as finished
             }
-
-            cout << "Process P" << currentProcess 
-                 << " executed for " << quantum 
-                 << " units of time. Time now: " << time << endl;
 
             // After executing, check for new arrivals
             for (int i = 0; i < numProcesses; i++) {
-                if (!isFinished[i] && arrivalTime[i] <= time && !inReadyQueue[i]) {
+                if (!processFinished[i] && arrivalTime[i] <= time && !inReadyQueue[i]) {
                     readyQueue.push(i);
                     inReadyQueue[i] = true;
                 }
@@ -74,16 +73,18 @@ void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turna
                 readyQueue.push(currentProcess);
                 inReadyQueue[currentProcess] = true;
             } else {
-                cout << "Process P" << currentProcess + 1 
-                     << " completed at time " << time << endl;
+                cout << "Process P" << currentProcess << " completed at time " << time << endl;
                 finishTime[currentProcess] = time;
-                isFinished[currentProcess] = true;
+                processFinished[currentProcess] = true;
             }
+        }
+        else {
+            time++;
         }
         // Check if all processes are finished
         bool finishedAll = true;
         for (int i = 0; i < numProcesses; i++) {
-            if (!isFinished[i]) {
+            if (!processFinished[i]) {
                 finishedAll = false;
                 break;
             }
@@ -141,7 +142,7 @@ int main() {
             cin >> arrivalTime[i];
         } 
         else {
-            cout << "Process P" << i + 1 << ": ";
+            cout << "Process P" << i << ": ";
             cin >> arrivalTime[i];
         }
     }
@@ -153,7 +154,7 @@ int main() {
             cin >> burstTime[i];
         } 
         else {
-            cout << "Process P" << i + 1 << ": ";
+            cout << "Process P" << i << ": ";
             cin >> burstTime[i];
         }
         remainingBurstTime[i] = burstTime[i];
@@ -165,7 +166,7 @@ int main() {
             cout << "Process P" << i << ": ";
             cin >> priority[i];
         } else {
-                cout << "Process P" << i + 1 << ": ";
+                cout << "Process P" << i << ": ";
             cin >> priority[i]; 
         }
     }
