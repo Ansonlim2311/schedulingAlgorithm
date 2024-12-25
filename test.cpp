@@ -1,10 +1,9 @@
 #include <iostream>
-#include <queue>
-#include <vector>
+#include <climits>
 
 using namespace std;
 
-void roundRobin() {
+void preemptivePriority() {
     int numProcesses;
     cout << "Enter the number of processes: ";
     cin >> numProcesses;
@@ -14,99 +13,87 @@ void roundRobin() {
         return;
     }
 
-    int arrivalTime[numProcesses], burstTime[numProcesses], waitingTime[numProcesses], turnaroundTime[numProcesses], priority[numProcesses];
-    int remainingBurstTime[numProcesses];
+    int arrivalTime[numProcesses], burstTime[numProcesses], remainingBurstTime[numProcesses];
+    int priority[numProcesses], waitingTime[numProcesses], turnaroundTime[numProcesses], finishTime[numProcesses];
+    bool processFinished[numProcesses] = {false};
+
+    int time = 0, completed = 0;
     float averageWaitingTime = 0, averageTurnaroundTime = 0;
 
     cout << "Enter arrival times for each process:\n";
     for (int i = 0; i < numProcesses; i++) {
-        cout << "Process P" << i + 1 << ": ";
-        cin >> arrivalTime[i];
+        if (i == 0) {
+            cout << "Process P" << i << ": ";
+            cin >> arrivalTime[i];
+        } 
+        else {
+            cout << "Process P" << i << ": ";
+            cin >> arrivalTime[i];
+        }
     }
 
     cout << "Enter burst times for each process:\n";
     for (int i = 0; i < numProcesses; i++) {
-        cout << "Process P" << i + 1 << ": ";
-        cin >> burstTime[i];
-        remainingBurstTime[i] = burstTime[i];  // Initialize remaining burst time
+        if (i == 0) {
+            cout << "Process P" << i << ": ";
+            cin >> burstTime[i];
+        } 
+        else {
+            cout << "Process P" << i << ": ";
+            cin >> burstTime[i];
+        }
+        remainingBurstTime[i] = burstTime[i];
     }
 
     cout << "Enter priority for each process:\n";
     for (int i = 0; i < numProcesses; i++) {
-        cout << "Process P" << i + 1 << ": ";
-        cin >> priority[i];
+        if (i == 0) {
+            cout << "Process P" << i << ": ";
+            cin >> priority[i];
+        } else {
+                cout << "Process P" << i << ": ";
+            cin >> priority[i]; 
+        }
     }
 
-    // Round Robin Scheduling with Quantum of 3
-    int quantum = 3;
-    int time = 0;
-    queue<int> readyQueue;
-    bool isFinished[numProcesses] = {false};
-    bool inReadyQueue[numProcesses] = {false};
 
-    // Loop until all processes are completed
-    while (true) {
-        bool allFinished = true;
+    // Preemptive Priority Scheduling Logic
+    while (completed != numProcesses) {
+        int minPriority = INT_MAX;
+        int currentProcess = -1;
 
-        // Add processes to ready queue if their arrival time <= current time
+        // Find process with highest priority (lowest value) that has arrived
         for (int i = 0; i < numProcesses; i++) {
-            if (!isFinished[i] && arrivalTime[i] <= time && !inReadyQueue[i]) {
-                readyQueue.push(i);
-                inReadyQueue[i] = true;
-            }
-        }
-
-        // Process the queue until it's empty
-        if (!readyQueue.empty()) {
-            int currentProcess = readyQueue.front();
-            readyQueue.pop();
-            inReadyQueue[currentProcess] = false;
-
-            // Check if the process can execute within the quantum
-            int execTime = min(quantum, remainingBurstTime[currentProcess]);
-            remainingBurstTime[currentProcess] -= execTime;
-            time += execTime;
-
-            cout << "Process P" << currentProcess + 1 
-                 << " executed for " << execTime 
-                 << " units of time. Time now: " << time << endl;
-
-            // After executing, check for new arrivals
-            for (int i = 0; i < numProcesses; i++) {
-                if (!isFinished[i] && arrivalTime[i] <= time && !inReadyQueue[i]) {
-                    readyQueue.push(i);
-                    inReadyQueue[i] = true;
+            if (arrivalTime[i] <= time && !processFinished[i]) {
+                if (priority[i] < minPriority) {
+                    minPriority = priority[i];
+                    currentProcess = i;
                 }
             }
-
-            // If the process is not finished, re-add it to the queue
-            if (remainingBurstTime[currentProcess] > 0) {
-                readyQueue.push(currentProcess);
-                inReadyQueue[currentProcess] = true;
-            } else {
-                cout << "Process P" << currentProcess + 1 
-                     << " completed at time " << time << endl;
-                isFinished[currentProcess] = true;
-            }
-        } else {
-            // If no process is ready, increment time
-            time++;
         }
 
-        // Check if all processes are finished
-        bool finishedAll = true;
-        for (int i = 0; i < numProcesses; i++) {
-            if (!isFinished[i]) {
-                finishedAll = false;
-                break;
-            }
+        if (currentProcess == -1) {
+            time++;  // No process ready, increment time
+            continue;
         }
-        if (finishedAll) break;
+
+        // Execute the selected process for 1 unit of time
+        remainingBurstTime[currentProcess]--;
+        time++;
+
+        cout << "Process P" << currentProcess << " executed at time " << time << endl;
+
+        // If process is completed
+        if (remainingBurstTime[currentProcess] == 0) {
+            finishTime[currentProcess] = time;
+            processFinished[currentProcess] = true;
+            completed++;
+        }
     }
 
-    // Calculate Waiting Time and Turnaround Time
+    // Calculate waiting time and turnaround time
     for (int i = 0; i < numProcesses; i++) {
-        turnaroundTime[i] = time - arrivalTime[i];  
+        turnaroundTime[i] = finishTime[i] - arrivalTime[i];
         waitingTime[i] = turnaroundTime[i] - burstTime[i];
 
         averageWaitingTime += waitingTime[i];
@@ -119,9 +106,8 @@ void roundRobin() {
     // Display results
     cout << "\nProcess Details:\n";
     for (int i = 0; i < numProcesses; i++) {
-        cout << "Process P" << i + 1 << ": Waiting Time = " 
-             << waitingTime[i] << ", Turnaround Time = " 
-             << turnaroundTime[i] << endl;
+        cout << "Process P" << i + 1 << ": Waiting Time = " << waitingTime[i]
+             << ", Turnaround Time = " << turnaroundTime[i] << endl;
     }
 
     cout << "\nAverage Waiting Time: " << averageWaitingTime << endl;
@@ -129,6 +115,6 @@ void roundRobin() {
 }
 
 int main() {
-    roundRobin();
+    preemptivePriority();
     return 0;
 }

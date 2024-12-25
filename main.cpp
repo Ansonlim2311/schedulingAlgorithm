@@ -1,6 +1,7 @@
 #include <iostream>
 #include <queue>
 #include <iomanip>
+#include <climits>
 
 using namespace std;
 
@@ -31,7 +32,7 @@ void createTable(int arrivalTime[], int burstTime[], int finishTime[], int turna
     cout << endl << "Process Details:" << endl;
     cout << "     Arrival Time   " << "Burst Time   " << "Priority   " << "Finish Time   " << "Turnaround Time   " << "Waiting Time" << endl;
     for (int i = 0; i < numProcesses; i++) {
-        cout << "P" << i + 1
+        cout << "P" << i
              << setw(4) << arrivalTime[i]
              << setw(15) << burstTime[i]
              << setw(13) << priority[i]
@@ -60,21 +61,20 @@ void calculation(int numProcesses, int turnaroundTime[], int waitingTime[]) {
 }
 
 void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
-    int time = 0, gantt = 0;
+    int time = 0, gantt = 0, completed = 0;
     int quantum = 3;
     string border[50], ganttChart[50], ganttChartTime[50];
     ganttChartTime[0] = "0";
     int ganttCounter = 1;
 
     queue<int> readyQueue;
-    bool processFinished[numProcesses] = {false};  // Process completion tracker
+    bool processFinished[numProcesses] = {false};
     bool inReadyQueue[numProcesses] = {false};  // Tracks if a process is in the queue
     int completionTime[numProcesses] = {0};  // Stores when each process completes
 
     cout << endl << "Round Robin with Quantum 3" << endl << endl;
 
-    while (true) {
-        bool allFinished = true;  // Flag to check if all processes are finished
+    while (completed != numProcesses) {
         // Add processes to the ready queue if their arrival time has passed
         for (int i = 0; i < numProcesses; i++) {
             if (!processFinished[i] && arrivalTime[i] <= time &&!inReadyQueue[i]) {
@@ -139,21 +139,11 @@ void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turna
                 // cout << "Process P" << currentProcess << " completed at time " << time << endl;
                 finishTime[currentProcess] = time;
                 processFinished[currentProcess] = true;
+                completed++;
             }
         }
         else {
             time++;
-        }
-        // Check if all processes are finished
-        bool finishedAll = true;
-        for (int i = 0; i < numProcesses; i++) {
-            if (!processFinished[i]) {
-                finishedAll = false;
-                break;
-            }
-        }
-        if (finishedAll) {
-            break;
         }
     }
 
@@ -169,6 +159,49 @@ void SJN(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTi
 
 void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
 
+    int time = 0, completed = 0;
+    bool processFinished[numProcesses] = {false};
+
+    cout << endl << "Preemptive Priority" << endl << endl;
+
+    while (completed != numProcesses) {
+        int minPriority = INT_MAX;
+        int currentProcess = -1;
+
+        for (int i = 0; i < numProcesses; i++) {
+            if (arrivalTime[i] <= time && !processFinished[i]) {
+                if (priority[i] < minPriority) {
+                    minPriority = priority[i];
+                    currentProcess = i;
+                }
+            }
+        }
+
+        if (currentProcess == -1) {
+            time++;
+            continue;
+        }
+
+        remainingBurstTime[currentProcess]--;
+        time++;
+
+        // cout << "Process P" << currentProcess << " executed at time " << time << endl;
+
+        if (remainingBurstTime[currentProcess] == 0) {
+            finishTime[currentProcess] = time;
+            processFinished[currentProcess] = true;
+            completed++;
+        }
+    }
+
+    for (int i = 0; i < numProcesses; i++) {
+        turnaroundTime[i] = finishTime[i] - arrivalTime[i];
+        waitingTime[i] = turnaroundTime[i] - burstTime[i];
+    }
+    
+    createTable(arrivalTime, burstTime, finishTime, turnaroundTime, waitingTime, priority, numProcesses);
+    cout << endl;
+    calculation(numProcesses, turnaroundTime, waitingTime);
 }
 
 void non_preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
@@ -187,8 +220,8 @@ int main() {
         return 0;
     }
 
-    int arrivalTime[numProcesses], burstTime[numProcesses], waitingTime[numProcesses], turnaroundTime[numProcesses], priority[numProcesses], finishTime[numProcesses];
-    int remainingBurstTime[numProcesses];
+    int arrivalTime[numProcesses], burstTime[numProcesses], waitingTime[numProcesses], 
+        turnaroundTime[numProcesses], priority[numProcesses], finishTime[numProcesses], remainingBurstTime[numProcesses];
 
     cout << "Enter arrival times for each process:\n";
     for (int i = 0; i < numProcesses; i++) {
@@ -236,6 +269,10 @@ int main() {
     cout << "3. Non-Preemptive Priority\n";
     cout << "Enter your choice: ";
     cin >> choice;
+
+    for (int i = 0; i < numProcesses; i++) {
+        remainingBurstTime[i] = burstTime[i];
+        }
 
     switch (choice) {
         case 1:
