@@ -159,8 +159,11 @@ void SJN(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTi
 
 void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
 
-    int time = 0, completed = 0;
+    int time = 0, gantt = 0, completed = 0, previousProcess = -1;
     bool processFinished[numProcesses] = {false};
+    string border[50], ganttChart[50], ganttChartTime[50];
+    ganttChartTime[0] = "0";
+    int ganttCounter = 1;
 
     cout << endl << "Preemptive Priority" << endl << endl;
 
@@ -185,12 +188,38 @@ void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], i
         remainingBurstTime[currentProcess]--;
         time++;
 
+        if (previousProcess == currentProcess) {
+            border[gantt] = "-";
+            ganttChart[gantt] = " ";
+            ganttChartTime[ganttCounter] =  " ";
+        } 
+        else {
+            border[gantt] = "----";
+            ganttChart[gantt] = "| P" + to_string(currentProcess);
+            if (time == 1) {
+                ganttChartTime[ganttCounter] = " ";
+            }
+            else if (time >= 10) {
+                ganttChartTime[ganttCounter] = "   " + to_string(time);
+            } 
+            else {
+                ganttChartTime[ganttCounter] = "  " + to_string(time);
+            }
+        }
+        gantt++;
+        ganttCounter++;
+        previousProcess = currentProcess;
+
         // cout << "Process P" << currentProcess << " executed at time " << time << endl;
 
         if (remainingBurstTime[currentProcess] == 0) {
+            border[gantt] = "-";
+            ganttChart[gantt] = " ";
             finishTime[currentProcess] = time;
             processFinished[currentProcess] = true;
             completed++;
+            gantt++;
+            ganttCounter++;
         }
     }
 
@@ -199,6 +228,7 @@ void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], i
         waitingTime[i] = turnaroundTime[i] - burstTime[i];
     }
     
+    createGantt(border, ganttChart, ganttChartTime, gantt, ganttCounter);
     createTable(arrivalTime, burstTime, finishTime, turnaroundTime, waitingTime, priority, numProcesses);
     cout << endl;
     calculation(numProcesses, turnaroundTime, waitingTime);
