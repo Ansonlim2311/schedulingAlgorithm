@@ -200,10 +200,10 @@ void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], i
                 ganttChartTime[ganttCounter] = " ";
             }
             else if (time >= 10) {
-                ganttChartTime[ganttCounter] = "   " + to_string(time);
+                ganttChartTime[ganttCounter] = "   " + to_string(time-1);
             } 
             else {
-                ganttChartTime[ganttCounter] = "  " + to_string(time);
+                ganttChartTime[ganttCounter] = "  " + to_string(time-1);
             }
         }
         gantt++;
