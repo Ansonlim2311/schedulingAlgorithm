@@ -63,7 +63,7 @@ void calculation(int numProcesses, int turnaroundTime[], int waitingTime[]) {
 void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
     int time = 0, gantt = 0, completed = 0;
     int quantum = 3;
-    string border[50], ganttChart[50], ganttChartTime[50];
+    string border[100], ganttChart[100], ganttChartTime[100];
     ganttChartTime[0] = "0";
     int ganttCounter = 1;
 
@@ -161,7 +161,7 @@ void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], i
 
     int time = 0, gantt = 0, completed = 0, previousProcess = -1;
     bool processFinished[numProcesses] = {false};
-    string border[50], ganttChart[50], ganttChartTime[50];
+    string border[100], ganttChart[100], ganttChartTime[100];
     ganttChartTime[0] = "0";
     int ganttCounter = 1;
 
@@ -222,6 +222,9 @@ void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], i
             ganttCounter++;
         }
     }
+
+    ganttChartTime[ganttCounter] = "   " + to_string(time);
+    ganttCounter++;
 
     for (int i = 0; i < numProcesses; i++) {
         turnaroundTime[i] = finishTime[i] - arrivalTime[i];
