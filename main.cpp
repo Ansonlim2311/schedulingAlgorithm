@@ -162,7 +162,7 @@ void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], i
     int time = 0, gantt = 0, completed = 0, previousProcess = -1;
     bool processFinished[numProcesses] = {false};
     string border[100], ganttChart[100], ganttChartTime[100];
-    ganttChartTime[0] = "0";
+    // ganttChartTime[0] = "0";
     int ganttCounter = 1;
 
     cout << endl << "Preemptive Priority" << endl << endl;
@@ -185,9 +185,6 @@ void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], i
             continue;
         }
 
-        remainingBurstTime[currentProcess]--;
-        time++;
-
         if (previousProcess == currentProcess) {
             border[gantt] = "-";
             ganttChart[gantt] = " ";
@@ -196,16 +193,20 @@ void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], i
         else {
             border[gantt] = "----";
             ganttChart[gantt] = "| P" + to_string(currentProcess);
-            if (time == 1) {
-                ganttChartTime[ganttCounter] = " ";
+            if (time == 0) {
+                ganttChartTime[ganttCounter] = "0 ";
             }
             else if (time >= 10) {
-                ganttChartTime[ganttCounter] = "   " + to_string(time-1);
+                ganttChartTime[ganttCounter] = "   " + to_string(time);
             } 
             else {
-                ganttChartTime[ganttCounter] = "  " + to_string(time-1);
+                ganttChartTime[ganttCounter] = "  " + to_string(time);
             }
         }
+
+        remainingBurstTime[currentProcess]--;
+        time++;
+
         gantt++;
         ganttCounter++;
         previousProcess = currentProcess;
@@ -219,7 +220,6 @@ void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], i
             processFinished[currentProcess] = true;
             completed++;
             gantt++;
-            ganttCounter++;
         }
     }
 
