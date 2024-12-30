@@ -158,7 +158,7 @@ void SJN(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTi
 
 void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
 
-    int time = 0, gantt = 0, completed = 0, previousProcess = -1;
+    int time = 0, gantt = 0, completed = 0, previousProcess = -1, counter = 0;
     bool processFinished[numProcesses] = {false};
     vector<string> border, ganttChart, ganttChartTime;
     // string border[100], ganttChart[100], ganttChartTime[100];
@@ -186,21 +186,21 @@ void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], i
         }
 
         if (previousProcess == currentProcess) {
-            border[gantt] = "-";
-            ganttChart[gantt] = " ";
-            ganttChartTime[ganttCounter] =  " ";
+            border.push_back("-");
+            ganttChart.push_back(" ");
+            ganttChartTime.push_back(" ");
         } 
         else {
-            border[gantt] = "----";
-            ganttChart[gantt] = "| P" + to_string(currentProcess);
+            border.push_back("----");
+            ganttChart.push_back("| P" + to_string(currentProcess));
             if (time == 0) {
-                ganttChartTime[ganttCounter] = "0 ";
+                ganttChartTime.push_back("0   ");
             }
             else if (time >= 10) {
-                ganttChartTime[ganttCounter] = "   " + to_string(time);
+                ganttChartTime.push_back("  " + to_string(time));
             } 
             else {
-                ganttChartTime[ganttCounter] = "  " + to_string(time);
+                ganttChartTime.push_back(" " + to_string(time));
             }
         }
 
@@ -214,8 +214,8 @@ void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], i
         // cout << "Process P" << currentProcess << " executed at time " << time << endl;
 
         if (remainingBurstTime[currentProcess] == 0) {
-            border[gantt] = "-";
-            ganttChart[gantt] = " ";
+            border.push_back("-");
+            ganttChart.push_back(" ");
             finishTime[currentProcess] = time;
             processFinished[currentProcess] = true;
             completed++;
@@ -223,15 +223,14 @@ void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], i
         }
     }
 
-    ganttChartTime[ganttCounter] = "   " + to_string(time);
-    ganttCounter++;
+    ganttChartTime.push_back("   " + to_string(time));
 
     for (int i = 0; i < numProcesses; i++) {
         turnaroundTime[i] = finishTime[i] - arrivalTime[i];
         waitingTime[i] = turnaroundTime[i] - burstTime[i];
     }
     
-    // createGantt(border, ganttChart, ganttChartTime, gantt, ganttCounter);
+    createGantt(border, ganttChart, ganttChartTime, gantt, ganttCounter);
     createTable(arrivalTime, burstTime, finishTime, turnaroundTime, waitingTime, priority, numProcesses);
     cout << endl;
     calculation(numProcesses, turnaroundTime, waitingTime);
