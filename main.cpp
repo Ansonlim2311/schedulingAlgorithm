@@ -52,13 +52,13 @@ void calculation(int numProcesses, int turnaroundTime[], int waitingTime[]) {
         averageTurnaroundTime += turnaroundTime[i];
     }
 
-    cout << "Total Turnaround Time  : " << averageTurnaroundTime << endl;
+    cout << "Total Turnaround Time   : " << averageTurnaroundTime << endl;
     averageTurnaroundTime /= numProcesses;
-    cout << "Average Turnaround Time: " << averageTurnaroundTime << endl;
+    cout << "Average Turnaround Time : " << averageTurnaroundTime << endl;
 
-    cout << "Total Waiting Time     : " << averageWaitingTime << endl;
+    cout << "Total Waiting Time      : " << averageWaitingTime << endl;
     averageWaitingTime /= numProcesses;
-    cout << "Average Waiting Time   : " << averageWaitingTime << endl << endl;
+    cout << "Average Waiting Time    : " << averageWaitingTime << endl << endl;
 }
 
 void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
