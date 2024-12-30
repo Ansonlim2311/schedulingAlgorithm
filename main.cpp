@@ -1,5 +1,6 @@
 #include <iostream>
 #include <queue>
+#include <vector>
 #include <iomanip>
 #include <climits>
 
