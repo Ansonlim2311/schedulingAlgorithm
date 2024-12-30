@@ -62,7 +62,7 @@ void calculation(int numProcesses, int turnaroundTime[], int waitingTime[]) {
 }
 
 void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
-    int time = 0, gantt = 0, completed = 0, counter = 0;
+    int time, gantt = 0, completed = 0, counter = 0;
     int quantum = 3;
     vector<string> border, ganttChart, ganttChartTime;
     ganttChartTime.push_back("0");
@@ -159,10 +159,11 @@ void SJN(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTi
 
 void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
 
-    int time = 0, gantt = 0, completed = 0, previousProcess = -1, counter = 0;
+    int time, ganttChartCounter, completed, previousProcess = -1, borderCounter;
+
     bool processFinished[numProcesses] = {false};
     vector<string> border, ganttChart, ganttChartTime;
-    int ganttCounter = 1;
+    int ganttChartTimeCounter = 1;
 
     cout << endl << "Preemptive Priority" << endl << endl;
 
@@ -193,7 +194,7 @@ void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], i
             border.push_back("----");
             if (time != 0) {
                 ganttChart.push_back(" ");
-                gantt++;
+                ganttChartCounter++;
             }
             ganttChart.push_back("| P" + to_string(currentProcess));
             if (time == 0) {
@@ -210,9 +211,9 @@ void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], i
         remainingBurstTime[currentProcess]--;
         time++;
 
-        counter++;
-        gantt++;
-        ganttCounter++;
+        borderCounter++;
+        ganttChartCounter++;
+        ganttChartTimeCounter++;
         previousProcess = currentProcess;
 
         // cout << "Process P" << currentProcess << " executed at time " << time << endl;
@@ -223,7 +224,7 @@ void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], i
             finishTime[currentProcess] = time;
             processFinished[currentProcess] = true;
             completed++;
-            counter++;
+            borderCounter++;
         }
     }
 
@@ -234,7 +235,7 @@ void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], i
         waitingTime[i] = turnaroundTime[i] - burstTime[i];
     }
     
-    createGantt(border, ganttChart, ganttChartTime, gantt, ganttCounter, counter);
+    createGantt(border, ganttChart, ganttChartTime, ganttChartCounter, ganttChartTimeCounter, borderCounter);
     createTable(arrivalTime, burstTime, finishTime, turnaroundTime, waitingTime, priority, numProcesses);
     cout << endl;
     calculation(numProcesses, turnaroundTime, waitingTime);
