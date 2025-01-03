@@ -153,8 +153,12 @@ void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turna
     calculation(numProcesses, turnaroundTime, waitingTime);
 }
 
-void SJN(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
-
+void SJN(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int remainingBurstTime[], int numProcesses, int finishTime[]) 
+{
+    createGantt(border, ganttChart, ganttChartTime, gantt, ganttCounter);
+    createTable(arrivalTime, burstTime, finishTime, turnaroundTime, waitingTime, priority, numProcesses);
+    cout << endl;
+    calculation(numProcesses, turnaroundTime, waitingTime);
 }
 
 void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
