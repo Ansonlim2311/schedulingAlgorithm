@@ -1,12 +1,13 @@
 #include <iostream>
 #include <queue>
+#include <vector>
 #include <iomanip>
 #include <climits>
 
 using namespace std;
 
-void createGantt(string border[],  string ganttChart[], string ganttChartTime[], int gantt, int ganttCounter) {
-    for (int i = 0; i < gantt; i++) {
+void createGantt(vector<string> border,  vector<string> ganttChart, vector<string> ganttChartTime, int gantt, int ganttCounter, int counter) {
+    for (int i = 0; i < counter; i++) {
         cout << border[i];
     }
     cout << "-" << endl;
@@ -16,7 +17,7 @@ void createGantt(string border[],  string ganttChart[], string ganttChartTime[],
     }
     cout << "|" << endl;
 
-    for (int i = 0; i < gantt; i++) {
+    for (int i = 0; i < counter; i++) {
         cout << border[i];
     }
     cout << "-" << endl;
@@ -51,20 +52,20 @@ void calculation(int numProcesses, int turnaroundTime[], int waitingTime[]) {
         averageTurnaroundTime += turnaroundTime[i];
     }
 
-    cout << "Total Turnaround Time  : " << averageTurnaroundTime << endl;
+    cout << "Total Turnaround Time   : " << averageTurnaroundTime << endl;
     averageTurnaroundTime /= numProcesses;
-    cout << "Average Turnaround Time: " << averageTurnaroundTime << endl;
+    cout << "Average Turnaround Time : " << averageTurnaroundTime << endl;
 
-    cout << "Total Waiting Time     : " << averageWaitingTime << endl;
+    cout << "Total Waiting Time      : " << averageWaitingTime << endl;
     averageWaitingTime /= numProcesses;
-    cout << "Average Waiting Time   : " << averageWaitingTime << endl << endl;
+    cout << "Average Waiting Time    : " << averageWaitingTime << endl << endl;
 }
 
 void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
-    int time = 0, gantt = 0, completed = 0;
+    int time, gantt = 0, completed = 0, counter = 0;
     int quantum = 3;
-    string border[100], ganttChart[100], ganttChartTime[100];
-    ganttChartTime[0] = "0";
+    vector<string> border, ganttChart, ganttChartTime;
+    ganttChartTime.push_back("0");
     int ganttCounter = 1;
 
     queue<int> readyQueue;
@@ -90,35 +91,34 @@ void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turna
             if (remainingBurstTime[currentProcess] > quantum) {
                 time += quantum;
                 remainingBurstTime[currentProcess] -= quantum;
-                border[gantt] = "-------";
+                border.push_back("-------");
                 // cout << "Process P" << currentProcess << " executed for " << quantum << " units of time. Time now: " << time << endl;
-                ganttChart[gantt] = "|  P" + to_string(currentProcess) + "  ";
-                // cout << "|  P" << currentProcess << "  ";
+                ganttChart.push_back("|  P" + to_string(currentProcess) + "  ");
                 if (time >= 10) {
-                    ganttChartTime[ganttCounter] =  "     " + to_string(time);
+                    ganttChartTime.push_back("     " + to_string(time));
                 } 
                 else {
-                    ganttChartTime[ganttCounter] =  "      " + to_string(time);
+                    ganttChartTime.push_back("      " + to_string(time));
                 }
             } 
             else {
                 time += remainingBurstTime[currentProcess];
                 turnaroundTime[currentProcess] = time - arrivalTime[currentProcess];
                 waitingTime[currentProcess] = turnaroundTime[currentProcess] - burstTime[currentProcess];
-                border[gantt] = "-----";
+                border.push_back("-----");
                 // cout << "Process P" << currentProcess << " executed for " << remainingBurstTime[currentProcess] << " units of time. Time now: " << time << endl;
-                ganttChart[gantt] = "| P" + to_string(currentProcess) + " ";
-                // cout << "| P" << currentProcess << " ";
+                ganttChart.push_back("| P" + to_string(currentProcess) + " ");
                 if (time >= 10) {
-                    ganttChartTime[ganttCounter] =  "   " + to_string(time);
+                    ganttChartTime.push_back("   " + to_string(time));
                 }
                 else {
-                    ganttChartTime[ganttCounter] =  "    " + to_string(time);
+                    ganttChartTime.push_back("    " + to_string(time));
                 }
                 remainingBurstTime[currentProcess] = 0;
                 processFinished[currentProcess] = true;  // Mark this process as finished
             }
 
+            counter++;
             gantt++;
             ganttCounter++;
 
@@ -147,7 +147,7 @@ void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turna
         }
     }
 
-    createGantt(border, ganttChart, ganttChartTime, gantt, ganttCounter);
+    createGantt(border, ganttChart, ganttChartTime, gantt, ganttCounter, counter);
     createTable(arrivalTime, burstTime, finishTime, turnaroundTime, waitingTime, priority, numProcesses);
     cout << endl;
     calculation(numProcesses, turnaroundTime, waitingTime);
@@ -163,11 +163,11 @@ void SJN(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTi
 
 void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
 
-    int time = 0, gantt = 0, completed = 0, previousProcess = -1;
+    int time, ganttChartCounter, completed, previousProcess = -1, borderCounter;
+
     bool processFinished[numProcesses] = {false};
-    string border[100], ganttChart[100], ganttChartTime[100];
-    ganttChartTime[0] = "0";
-    int ganttCounter = 1;
+    vector<string> border, ganttChart, ganttChartTime;
+    int ganttChartTimeCounter = 1;
 
     cout << endl << "Preemptive Priority" << endl << endl;
 
@@ -189,53 +189,57 @@ void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], i
             continue;
         }
 
+        if (previousProcess == currentProcess) {
+            border.push_back("-");
+            ganttChart.push_back(" ");
+            ganttChartTime.push_back(" ");
+        } 
+        else {
+            border.push_back("----");
+            if (time != 0) {
+                ganttChart.push_back(" ");
+                ganttChartCounter++;
+            }
+            ganttChart.push_back("| P" + to_string(currentProcess));
+            if (time == 0) {
+                ganttChartTime.push_back("0   ");
+            }
+            else if (time >= 10) {
+                ganttChartTime.push_back("   " + to_string(time));
+            } 
+            else {
+                ganttChartTime.push_back(" " + to_string(time));
+            }
+        }
+
         remainingBurstTime[currentProcess]--;
         time++;
 
-        if (previousProcess == currentProcess) {
-            border[gantt] = "-";
-            ganttChart[gantt] = " ";
-            ganttChartTime[ganttCounter] =  " ";
-        } 
-        else {
-            border[gantt] = "----";
-            ganttChart[gantt] = "| P" + to_string(currentProcess);
-            if (time == 1) {
-                ganttChartTime[ganttCounter] = " ";
-            }
-            else if (time >= 10) {
-                ganttChartTime[ganttCounter] = "   " + to_string(time-1);
-            } 
-            else {
-                ganttChartTime[ganttCounter] = "  " + to_string(time-1);
-            }
-        }
-        gantt++;
-        ganttCounter++;
+        borderCounter++;
+        ganttChartCounter++;
+        ganttChartTimeCounter++;
         previousProcess = currentProcess;
 
         // cout << "Process P" << currentProcess << " executed at time " << time << endl;
 
         if (remainingBurstTime[currentProcess] == 0) {
-            border[gantt] = "-";
-            ganttChart[gantt] = " ";
+            border.push_back("-");
+            // ganttChart.push_back(" ");
             finishTime[currentProcess] = time;
             processFinished[currentProcess] = true;
             completed++;
-            gantt++;
-            ganttCounter++;
+            borderCounter++;
         }
     }
 
-    ganttChartTime[ganttCounter] = "   " + to_string(time);
-    ganttCounter++;
+    ganttChartTime.push_back("   " + to_string(time));
 
     for (int i = 0; i < numProcesses; i++) {
         turnaroundTime[i] = finishTime[i] - arrivalTime[i];
         waitingTime[i] = turnaroundTime[i] - burstTime[i];
     }
     
-    createGantt(border, ganttChart, ganttChartTime, gantt, ganttCounter);
+    createGantt(border, ganttChart, ganttChartTime, ganttChartCounter, ganttChartTimeCounter, borderCounter);
     createTable(arrivalTime, burstTime, finishTime, turnaroundTime, waitingTime, priority, numProcesses);
     cout << endl;
     calculation(numProcesses, turnaroundTime, waitingTime);
