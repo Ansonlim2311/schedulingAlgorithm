@@ -61,9 +61,9 @@ void calculation(int numProcesses, int turnaroundTime[], int waitingTime[]) {
     cout << "Average Waiting Time    : " << averageWaitingTime << endl << endl;
 }
 
-void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
-    int time, gantt = 0, completed = 0, counter = 0;
-    int quantum = 3;
+void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[], int timeQuantum) {
+    int time = 0, gantt = 0, completed = 0, counter = 0;
+    int quantum = timeQuantum;
     vector<string> border, ganttChart, ganttChartTime;
     ganttChartTime.push_back("0");
     int ganttCounter = 1;
@@ -73,7 +73,7 @@ void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turna
     bool inReadyQueue[numProcesses] = {false};  // Tracks if a process is in the queue
     int completionTime[numProcesses] = {0};  // Stores when each process completes
 
-    cout << endl << "Round Robin with Quantum 3" << endl << endl;
+    cout << endl << "Round Robin with Quantum " << quantum << endl << endl;
 
     while (completed != numProcesses) {
         // Add processes to the ready queue if their arrival time has passed
@@ -100,19 +100,31 @@ void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turna
                 else {
                     ganttChartTime.push_back("      " + to_string(time));
                 }
-            } 
+            }
             else {
                 time += remainingBurstTime[currentProcess];
                 turnaroundTime[currentProcess] = time - arrivalTime[currentProcess];
                 waitingTime[currentProcess] = turnaroundTime[currentProcess] - burstTime[currentProcess];
-                border.push_back("-----");
                 // cout << "Process P" << currentProcess << " executed for " << remainingBurstTime[currentProcess] << " units of time. Time now: " << time << endl;
-                ganttChart.push_back("| P" + to_string(currentProcess) + " ");
-                if (time >= 10) {
-                    ganttChartTime.push_back("   " + to_string(time));
+                if (remainingBurstTime[currentProcess] == quantum) {
+                    border.push_back("-------");
+                    ganttChart.push_back("|  P" + to_string(currentProcess) + "  ");
+                    if (time >= 10) {
+                        ganttChartTime.push_back("     " + to_string(time));
+                    } 
+                    else {
+                        ganttChartTime.push_back("      " + to_string(time));
+                    }
                 }
                 else {
-                    ganttChartTime.push_back("    " + to_string(time));
+                    border.push_back("-----");
+                    ganttChart.push_back("| P" + to_string(currentProcess) + " ");
+                    if (time >= 10) {
+                        ganttChartTime.push_back("   " + to_string(time));
+                    }
+                    else {
+                        ganttChartTime.push_back("    " + to_string(time));
+                    }
                 }
                 remainingBurstTime[currentProcess] = 0;
                 processFinished[currentProcess] = true;  // Mark this process as finished
@@ -153,9 +165,9 @@ void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turna
     calculation(numProcesses, turnaroundTime, waitingTime);
 }
 
-void SJN(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int remainingBurstTime[], int numProcesses, int finishTime[]) 
+void SJN(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) 
 {
-    createGantt(border, ganttChart, ganttChartTime, gantt, ganttCounter);
+    // createGantt(border, ganttChart, ganttChartTime, gantt, ganttCounter);
     createTable(arrivalTime, burstTime, finishTime, turnaroundTime, waitingTime, priority, numProcesses);
     cout << endl;
     calculation(numProcesses, turnaroundTime, waitingTime);
@@ -163,7 +175,7 @@ void SJN(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTi
 
 void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
 
-    int time, ganttChartCounter, completed, previousProcess = -1, borderCounter;
+    int time = 0, ganttChartCounter = 0, completed = 0, previousProcess = -1, borderCounter = 0;
 
     bool processFinished[numProcesses] = {false};
     vector<string> border, ganttChart, ganttChartTime;
@@ -252,6 +264,7 @@ void non_preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[
 int main() {
 
     int numProcesses;
+    int timeQuantum;
 
     cout << "Enter the number of processes: ";
     cin >> numProcesses;
@@ -300,7 +313,10 @@ int main() {
         }
     }
 
-    roundRobin(arrivalTime, burstTime, waitingTime, turnaroundTime, priority, remainingBurstTime, numProcesses, finishTime);
+    cout << "Enter Time Quantum For Round Robin: ";
+    cin >> timeQuantum;
+
+    roundRobin(arrivalTime, burstTime, waitingTime, turnaroundTime, priority, remainingBurstTime, numProcesses, finishTime, timeQuantum);
 
     int choice;
 
@@ -317,7 +333,7 @@ int main() {
 
     switch (choice) {
         case 1:
-            SJN(arrivalTime, burstTime, waitingTime, turnaroundTime, remainingBurstTime, numProcesses, finishTime);
+            SJN(arrivalTime, burstTime, waitingTime, turnaroundTime, remainingBurstTime, priority, numProcesses, finishTime);
             break;
         case 2:
             preemptivePriority(arrivalTime, burstTime, waitingTime, turnaroundTime, priority, remainingBurstTime, numProcesses, finishTime);
