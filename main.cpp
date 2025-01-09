@@ -3,6 +3,7 @@
 #include <vector>
 #include <iomanip>
 #include <climits>
+#include<algorithm>
 
 using namespace std;
 
@@ -165,9 +166,63 @@ void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turna
     calculation(numProcesses, turnaroundTime, waitingTime);
 }
 
-void SJN(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) 
-{
-    // createGantt(border, ganttChart, ganttChartTime, gantt, ganttCounter);
+void SJN(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
+    vector<string> border, ganttChart, ganttChartTime;
+    int gantt = 0, ganttCounter = 0, counter = 0, time = 0;
+    int completed = 0;
+    bool processFinished[numProcesses] = {false}; // Tracks if a process is completed
+    ganttChartTime.push_back("0");
+
+    cout<<endl;
+    cout<<"Shortest Job Next"<<endl;
+    cout<<endl;
+
+    while (completed != numProcesses) {
+        int currentProcess = -1;
+        int smallestBurstTime = INT_MAX;
+
+        // Find the next process with the smallest burst time that has arrived
+        for (int i = 0; i < numProcesses; i++) {
+            if (arrivalTime[i] <= time && !processFinished[i] && burstTime[i] < smallestBurstTime) {
+                smallestBurstTime = burstTime[i];
+                currentProcess = i;
+            }
+        }
+
+        if (currentProcess == -1) {
+            // No process is ready to execute, increment time
+            time++;
+            ganttChartTime.push_back("    " + to_string(time));
+            continue;
+        }
+
+        // Execute the selected process
+        time += burstTime[currentProcess];
+        turnaroundTime[currentProcess] = time - arrivalTime[currentProcess];
+        waitingTime[currentProcess] = turnaroundTime[currentProcess] - burstTime[currentProcess];
+        finishTime[currentProcess] = time;
+        processFinished[currentProcess] = true;
+        completed++;
+
+        // cout<<completed<<' ' <<time<<endl;
+        
+        // Update Gantt chart
+        border.push_back("-------");
+        ganttChart.push_back("|  P" + to_string(currentProcess) + "  ");
+        if (time >= 10) {
+            ganttChartTime.push_back("     " + to_string(time));
+        } else {
+            ganttChartTime.push_back("      " + to_string(time));
+            // cout<<completed<<' ' <<time<<endl;
+
+        }
+        gantt++;
+        ganttCounter++;
+        counter++;
+    }
+
+    // Print the Gantt chart
+    createGantt(border, ganttChart, ganttChartTime, gantt, ganttCounter, counter);
     createTable(arrivalTime, burstTime, finishTime, turnaroundTime, waitingTime, priority, numProcesses);
     cout << endl;
     calculation(numProcesses, turnaroundTime, waitingTime);
