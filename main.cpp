@@ -3,27 +3,27 @@
 #include <vector>
 #include <iomanip>
 #include <climits>
-#include<algorithm>
+#include <algorithm>
 
 using namespace std;
 
-void createGantt(vector<string> border,  vector<string> ganttChart, vector<string> ganttChartTime, int gantt, int ganttCounter, int counter) {
-    for (int i = 0; i < counter; i++) {
+void createGantt(vector<string> border,  vector<string> ganttChart, vector<string> ganttChartTime, int ganttChartCounter, int ganttChartTimeCounter, int borderCounter) {
+    for (int i = 0; i < borderCounter; i++) {
         cout << border[i];
     }
     cout << "-" << endl;
 
-    for (int i = 0; i < gantt; i++) {
+    for (int i = 0; i < ganttChartCounter; i++) {
         cout << ganttChart[i];
     }
     cout << "|" << endl;
 
-    for (int i = 0; i < counter; i++) {
+    for (int i = 0; i < borderCounter; i++) {
         cout << border[i];
     }
     cout << "-" << endl;
 
-    for (int i = 0; i < ganttCounter; i++) {
+    for (int i = 0; i < ganttChartTimeCounter; i++) {
         cout << ganttChartTime[i];
     }
     cout << endl;
@@ -74,12 +74,12 @@ void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turna
     bool inReadyQueue[numProcesses] = {false};  // Tracks if a process is in the queue
     int completionTime[numProcesses] = {0};  // Stores when each process completes
 
-    cout << endl << "Round Robin with Quantum " << quantum << endl << endl;
+    cout << endl << "Round Robin with Quantum " << quantum << endl;
 
     while (completed != numProcesses) {
         // Add processes to the ready queue if their arrival time has passed
         for (int i = 0; i < numProcesses; i++) {
-            if (!processFinished[i] && arrivalTime[i] <= time &&!inReadyQueue[i]) {
+            if (!processFinished[i] && arrivalTime[i] <= time && !inReadyQueue[i]) {
                 readyQueue.push(i);
                 inReadyQueue[i] = true;  // Mark process as added to the ready queue
             }
@@ -168,14 +168,13 @@ void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turna
 
 void SJN(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
     vector<string> border, ganttChart, ganttChartTime;
-    int gantt = 0, ganttCounter = 0, counter = 0, time = 0;
+    int ganttChartCounter = 0, ganttChartTimeCounter = 0, borderCounter = 0, time = 0;
     int completed = 0;
-    bool processFinished[numProcesses] = {false}; // Tracks if a process is completed
+    bool processFinished[numProcesses] = {false};
     ganttChartTime.push_back("0");
 
-    cout<<endl;
-    cout<<"Shortest Job Next"<<endl;
-    cout<<endl;
+    cout << endl;
+    cout << "Shortest Job Next" << endl;
 
     while (completed != numProcesses) {
         int currentProcess = -1;
@@ -196,33 +195,32 @@ void SJN(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTi
             continue;
         }
 
-        // Execute the selected process
         time += burstTime[currentProcess];
         turnaroundTime[currentProcess] = time - arrivalTime[currentProcess];
         waitingTime[currentProcess] = turnaroundTime[currentProcess] - burstTime[currentProcess];
         finishTime[currentProcess] = time;
         processFinished[currentProcess] = true;
         completed++;
-
-        // cout<<completed<<' ' <<time<<endl;
         
         // Update Gantt chart
         border.push_back("-------");
         ganttChart.push_back("|  P" + to_string(currentProcess) + "  ");
+
         if (time >= 10) {
             ganttChartTime.push_back("     " + to_string(time));
         } else {
             ganttChartTime.push_back("      " + to_string(time));
-            // cout<<completed<<' ' <<time<<endl;
-
         }
-        gantt++;
-        ganttCounter++;
-        counter++;
+
+        ganttChartCounter++;
+        ganttChartTimeCounter++;
+        borderCounter++;
     }
 
-    // Print the Gantt chart
-    createGantt(border, ganttChart, ganttChartTime, gantt, ganttCounter, counter);
+    ganttChartTime.push_back("      " + to_string(time));
+    ganttChartTimeCounter++;
+
+    createGantt(border, ganttChart, ganttChartTime, ganttChartCounter, ganttChartTimeCounter, borderCounter);
     createTable(arrivalTime, burstTime, finishTime, turnaroundTime, waitingTime, priority, numProcesses);
     cout << endl;
     calculation(numProcesses, turnaroundTime, waitingTime);
@@ -230,13 +228,13 @@ void SJN(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTi
 
 void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
 
-    int time = 0, ganttChartCounter = 0, completed = 0, previousProcess = -1, borderCounter = 0;
+    int time = 0, ganttChartCounter = 0, completed = 0, previousProcess = -1, borderCounter = 0, swapCounter = 0;
 
     bool processFinished[numProcesses] = {false};
     vector<string> border, ganttChart, ganttChartTime;
     int ganttChartTimeCounter = 1;
 
-    cout << endl << "Preemptive Priority" << endl << endl;
+    cout << endl << "Preemptive Priority" << endl;
 
     while (completed != numProcesses) {
         int minPriority = INT_MAX;
@@ -256,42 +254,33 @@ void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], i
             continue;
         }
 
-        if (previousProcess == currentProcess) {
-            border.push_back("-");
-            ganttChart.push_back(" ");
-            ganttChartTime.push_back(" ");
-        } 
-        else {
-            border.push_back("----");
-            if (time != 0) {
-                ganttChart.push_back(" ");
-                ganttChartCounter++;
-            }
-            ganttChart.push_back("| P" + to_string(currentProcess));
+        if (currentProcess != previousProcess) {
+            swapCounter++;
+
+            border.push_back("------");
+            ganttChart.push_back("|  P" + to_string(currentProcess) + "  ");
             if (time == 0) {
-                ganttChartTime.push_back("0   ");
+                ganttChartTime.push_back("0");
             }
             else if (time >= 10) {
-                ganttChartTime.push_back("   " + to_string(time));
+                ganttChartTime.push_back("     " + to_string(time));
             } 
             else {
-                ganttChartTime.push_back(" " + to_string(time));
+                ganttChartTime.push_back("      " + to_string(time));
             }
+            borderCounter++;
+            ganttChartCounter++;
+            ganttChartTimeCounter++;
         }
 
         remainingBurstTime[currentProcess]--;
         time++;
-
-        borderCounter++;
-        ganttChartCounter++;
-        ganttChartTimeCounter++;
         previousProcess = currentProcess;
 
         // cout << "Process P" << currentProcess << " executed at time " << time << endl;
 
         if (remainingBurstTime[currentProcess] == 0) {
             border.push_back("-");
-            // ganttChart.push_back(" ");
             finishTime[currentProcess] = time;
             processFinished[currentProcess] = true;
             completed++;
@@ -299,11 +288,19 @@ void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], i
         }
     }
 
-    ganttChartTime.push_back("   " + to_string(time));
+    ganttChartTime.push_back("     " + to_string(time));
 
     for (int i = 0; i < numProcesses; i++) {
         turnaroundTime[i] = finishTime[i] - arrivalTime[i];
         waitingTime[i] = turnaroundTime[i] - burstTime[i];
+    }
+
+    if (swapCounter > numProcesses) {
+        swapCounter = swapCounter - numProcesses;
+        for (int i = 0; i < swapCounter; i++) {
+            border.push_back("-");
+            borderCounter++;
+        }
     }
     
     createGantt(border, ganttChart, ganttChartTime, ganttChartCounter, ganttChartTimeCounter, borderCounter);
@@ -314,6 +311,44 @@ void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], i
 
 void non_preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
 
+}
+
+void userSelection(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
+    int choice;
+
+    cout << "Choose scheduling algorithm:\n";
+    cout << "1. Shortest Job Next\n";
+    cout << "2. Preemptive Priority\n";
+    cout << "3. Non-Preemptive Priority\n";
+    cout << "4. Exit The Program\n";
+
+    cout << "Enter your choice: ";
+    cin >> choice;
+
+    for (int i = 0; i < numProcesses; i++) {
+        remainingBurstTime[i] = burstTime[i];
+        }
+
+    switch (choice) {
+        case 1:
+            SJN(arrivalTime, burstTime, waitingTime, turnaroundTime, remainingBurstTime, priority, numProcesses, finishTime);
+            userSelection(arrivalTime, burstTime, waitingTime, turnaroundTime, priority, remainingBurstTime, numProcesses, finishTime);
+            break;
+        case 2:
+            preemptivePriority(arrivalTime, burstTime, waitingTime, turnaroundTime, priority, remainingBurstTime, numProcesses, finishTime);
+            userSelection(arrivalTime, burstTime, waitingTime, turnaroundTime, priority, remainingBurstTime, numProcesses, finishTime);
+            break;
+        case 3:
+            non_preemptivePriority(arrivalTime, burstTime, waitingTime, turnaroundTime, priority, remainingBurstTime, numProcesses, finishTime);
+            userSelection(arrivalTime, burstTime, waitingTime, turnaroundTime, priority, remainingBurstTime, numProcesses, finishTime);
+            break;
+        case 4:
+        cout << endl << "Exiting..." << endl;
+            break;
+        default:
+            cout << "Invalid choice!" << endl << endl;
+            userSelection(arrivalTime, burstTime, waitingTime, turnaroundTime, priority, remainingBurstTime, numProcesses, finishTime);
+    }
 }
 
 int main() {
@@ -373,30 +408,5 @@ int main() {
 
     roundRobin(arrivalTime, burstTime, waitingTime, turnaroundTime, priority, remainingBurstTime, numProcesses, finishTime, timeQuantum);
 
-    int choice;
-
-    cout << "Choose scheduling algorithm:\n";
-    cout << "1. Shortest Job Next\n";
-    cout << "2. Preemptive Priority\n";
-    cout << "3. Non-Preemptive Priority\n";
-    cout << "Enter your choice: ";
-    cin >> choice;
-
-    for (int i = 0; i < numProcesses; i++) {
-        remainingBurstTime[i] = burstTime[i];
-        }
-
-    switch (choice) {
-        case 1:
-            SJN(arrivalTime, burstTime, waitingTime, turnaroundTime, remainingBurstTime, priority, numProcesses, finishTime);
-            break;
-        case 2:
-            preemptivePriority(arrivalTime, burstTime, waitingTime, turnaroundTime, priority, remainingBurstTime, numProcesses, finishTime);
-            break;
-        case 3:
-            non_preemptivePriority(arrivalTime, burstTime, waitingTime, turnaroundTime, priority, remainingBurstTime, numProcesses, finishTime);
-            break;
-        default:
-            cout << "Invalid choice!";
-    }
+    userSelection(arrivalTime, burstTime, waitingTime, turnaroundTime, priority, remainingBurstTime, numProcesses, finishTime);
 }
