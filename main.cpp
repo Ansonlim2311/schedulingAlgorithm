@@ -310,6 +310,63 @@ void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], i
 }
 
 void non_preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
+    vector<string> border, ganttChart, ganttChartTime;
+    int ganttChartCounter = 0, ganttChartTimeCounter = 0, borderCounter = 0, time = 0;
+    int completed = 0;
+    bool processFinished[numProcesses] = {false};
+    ganttChartTime.push_back("0");
+
+    cout << endl;
+    cout << "Non Preeemptive Priority" << endl;
+
+    while (completed != numProcesses) {
+        int currentProcess = -1;
+        int highestPriority = INT_MAX;
+
+        // Find the next process with the smallest burst time that has arrived
+        for (int i = 0; i < numProcesses; i++) {
+            if (arrivalTime[i] <= time && !processFinished[i] && priority[i] < highestPriority) {
+                highestPriority = priority[i];
+                currentProcess = i;
+            }
+        }
+
+        if (currentProcess == -1) {
+            // No process is ready to execute, increment time
+            time++;
+            ganttChartTime.push_back("    " + to_string(time));
+            continue;
+        }
+
+        time += burstTime[currentProcess];
+        turnaroundTime[currentProcess] = time - arrivalTime[currentProcess];
+        waitingTime[currentProcess] = turnaroundTime[currentProcess] - burstTime[currentProcess];
+        finishTime[currentProcess] = time;
+        processFinished[currentProcess] = true;
+        completed++;
+        
+        // Update Gantt chart
+        border.push_back("-------");
+        ganttChart.push_back("|  P" + to_string(currentProcess) + "  ");
+
+        if (time >= 10) {
+            ganttChartTime.push_back("     " + to_string(time));
+        } else {
+            ganttChartTime.push_back("      " + to_string(time));
+        }
+
+        ganttChartCounter++;
+        ganttChartTimeCounter++;
+        borderCounter++;
+    }
+
+    ganttChartTime.push_back("      " + to_string(time));
+    ganttChartTimeCounter++;
+
+    createGantt(border, ganttChart, ganttChartTime, ganttChartCounter, ganttChartTimeCounter, borderCounter);
+    createTable(arrivalTime, burstTime, finishTime, turnaroundTime, waitingTime, priority, numProcesses);
+    cout << endl;
+    calculation(numProcesses, turnaroundTime, waitingTime);
 
 }
 
