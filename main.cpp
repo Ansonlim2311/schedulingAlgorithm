@@ -93,7 +93,6 @@ void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turna
                 time += quantum;
                 remainingBurstTime[currentProcess] -= quantum;
                 border.push_back("-------");
-                // cout << "Process P" << currentProcess << " executed for " << quantum << " units of time. Time now: " << time << endl;
                 ganttChart.push_back("|  P" + to_string(currentProcess) + "  ");
                 if (time >= 10) {
                     ganttChartTime.push_back("     " + to_string(time));
@@ -106,7 +105,6 @@ void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turna
                 time += remainingBurstTime[currentProcess];
                 turnaroundTime[currentProcess] = time - arrivalTime[currentProcess];
                 waitingTime[currentProcess] = turnaroundTime[currentProcess] - burstTime[currentProcess];
-                // cout << "Process P" << currentProcess << " executed for " << remainingBurstTime[currentProcess] << " units of time. Time now: " << time << endl;
                 if (remainingBurstTime[currentProcess] == quantum) {
                     border.push_back("-------");
                     ganttChart.push_back("|  P" + to_string(currentProcess) + "  ");
@@ -149,7 +147,6 @@ void roundRobin(int arrivalTime[], int burstTime[], int waitingTime[], int turna
                 readyQueue.push(currentProcess);
                 inReadyQueue[currentProcess] = true;
             } else {
-                // cout << "Process P" << currentProcess << " completed at time " << time << endl;
                 finishTime[currentProcess] = time;
                 processFinished[currentProcess] = true;
                 completed++;
@@ -277,8 +274,6 @@ void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], i
         time++;
         previousProcess = currentProcess;
 
-        // cout << "Process P" << currentProcess << " executed at time " << time << endl;
-
         if (remainingBurstTime[currentProcess] == 0) {
             border.push_back("-");
             finishTime[currentProcess] = time;
@@ -367,7 +362,6 @@ void non_preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[
     createTable(arrivalTime, burstTime, finishTime, turnaroundTime, waitingTime, priority, numProcesses);
     cout << endl;
     calculation(numProcesses, turnaroundTime, waitingTime);
-
 }
 
 void userSelection(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
