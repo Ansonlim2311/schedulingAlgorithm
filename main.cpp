@@ -179,9 +179,16 @@ void SJN(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTi
 
         // Find the next process with the smallest burst time that has arrived
         for (int i = 0; i < numProcesses; i++) {
-            if (arrivalTime[i] <= time && !processFinished[i] && burstTime[i] < smallestBurstTime) {
-                smallestBurstTime = burstTime[i];
-                currentProcess = i;
+            if (arrivalTime[i] <= time && !processFinished[i]) {
+                if (burstTime[i] < smallestBurstTime) {
+                    smallestBurstTime = burstTime[i];
+                    currentProcess = i;
+                }
+                else if (burstTime[i] == smallestBurstTime) {
+                    if (arrivalTime[i] < arrivalTime[currentProcess]) {
+                        currentProcess = i;
+                    }
+                }
             }
         }
 
@@ -226,7 +233,6 @@ void SJN(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTi
 void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTime[], int priority[], int remainingBurstTime[], int numProcesses, int finishTime[]) {
 
     int time = 0, ganttChartCounter = 0, completed = 0, previousProcess = -1, borderCounter = 0, swapCounter = 0;
-
     bool processFinished[numProcesses] = {false};
     vector<string> border, ganttChart, ganttChartTime;
     int ganttChartTimeCounter = 1;
@@ -234,14 +240,19 @@ void preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[], i
     cout << endl << "Preemptive Priority" << endl;
 
     while (completed != numProcesses) {
-        int minPriority = INT_MAX;
+        int highestPriority = INT_MAX;
         int currentProcess = -1;
 
         for (int i = 0; i < numProcesses; i++) {
-            if (arrivalTime[i] <= time && !processFinished[i]) {
-                if (priority[i] < minPriority) {
-                    minPriority = priority[i];
-                    currentProcess = i;
+            if (arrivalTime[i] <= time && !processFinished[i]) { // to check process arrived and not finished
+                if (priority[i] == priority[currentProcess]) {
+                    if (burstTime[i] == burstTime[currentProcess]) {
+                        continue; // same priority and burst time so no preemption
+                    }
+                }
+                if (priority[i] < highestPriority) {
+                    highestPriority = priority[i];
+                    currentProcess = i; // change to another process if it have a higher priority
                 }
             }
         }
@@ -320,9 +331,16 @@ void non_preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[
 
         // Find the next process with the smallest burst time that has arrived
         for (int i = 0; i < numProcesses; i++) {
-            if (arrivalTime[i] <= time && !processFinished[i] && priority[i] < highestPriority) {
-                highestPriority = priority[i];
-                currentProcess = i;
+            if (arrivalTime[i] <= time && !processFinished[i]) {
+                if (priority[i] < highestPriority) {
+                    highestPriority = priority[i];
+                    currentProcess = i;
+                }
+                else if (priority[i] == highestPriority) {
+                    if (arrivalTime[i] < arrivalTime[currentProcess]) {
+                        currentProcess = i;
+                    }
+                }
             }
         }
 
