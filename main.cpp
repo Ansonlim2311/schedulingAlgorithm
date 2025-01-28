@@ -184,7 +184,7 @@ void SJN(int arrivalTime[], int burstTime[], int waitingTime[], int turnaroundTi
                     smallestBurstTime = burstTime[i];
                     currentProcess = i;
                 }
-                else if (burstTime[i] == smallestBurstTime) {
+                else if (burstTime[i] == burstTime[currentProcess]) {
                     if (arrivalTime[i] < arrivalTime[currentProcess]) {
                         currentProcess = i;
                     }
@@ -336,7 +336,7 @@ void non_preemptivePriority(int arrivalTime[], int burstTime[], int waitingTime[
                     highestPriority = priority[i];
                     currentProcess = i;
                 }
-                else if (priority[i] == highestPriority) {
+                else if (priority[i] == priority[currentProcess]) {
                     if (arrivalTime[i] < arrivalTime[currentProcess]) {
                         currentProcess = i;
                     }
